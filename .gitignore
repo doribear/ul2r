@@ -1,0 +1,5 @@
+corpus
+result
+__pycache__
+감성대화말뭉치.csv
+tokenizer.json
