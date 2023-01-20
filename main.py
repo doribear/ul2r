@@ -2,12 +2,13 @@ from UL2R import UL2R_dataset, MLM_dataset, Classify_dataset
 from transformers import AlbertForMaskedLM, AlbertConfig, AlbertForSequenceClassification, get_constant_schedule_with_warmup
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
-from pytorch_metric.metric import Metric
+from sklearn import metrics
 
 import os
 import torch
 import deepspeed
 import argparse
+import numpy as np
 
 parser = argparse.ArgumentParser()
 
@@ -52,7 +53,7 @@ def get_classification_settings():
     model.load_state_dict(torch.load(args.plm, 'cpu')['module'], strict = False)
     lossfn = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), 1e-4)
-    scheduler = get_constant_schedule_with_warmup(optimizer = optimizer, num_warmup_steps = 100)
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer = optimizer, lr_lambda = lambda epoch : (1 - 1e-4) ** epoch)
     return model, dataset, lossfn, optimizer, scheduler
 
 def get_paths(save_path):
@@ -84,7 +85,7 @@ def pretrain(model, dataset, lossfn, optimizer, scheduler):
         ids, mask, type_ids, attention_mask = ids.to(model.device), mask.to(model.device), type_ids.to(model.device), attention_mask.to(model.device)
         out = model(input_ids = mask, token_type_ids = type_ids, attention_mask = attention_mask)['logits']
         loss = lossfn(out.view(out.shape[0] * out.shape[1], -1), ids.flatten())
-        loss.backward()
+        model.backward(loss)
         optimizer.step()
         scheduler.step()
         writer.add_scalar('loss', loss.item(), step)
@@ -95,7 +96,6 @@ def pretrain(model, dataset, lossfn, optimizer, scheduler):
 
 def fine_tuning_classification_task(model, dataset, lossfn, optimizer, scheduler):
 
-    metric = Metric()
     get_paths(args.save_path)
     model, optimizer, loader, scheduler = deepspeed.initialize(model = model, 
     optimizer = optimizer, 
@@ -106,22 +106,27 @@ def fine_tuning_classification_task(model, dataset, lossfn, optimizer, scheduler
 
     writer = SummaryWriter(f'{args.save_path}/sub_node_result')
     writer.add_text('parameter_size', f'{sum(p.numel() for p in model.parameters())}', 0)
-    for epoch in range(10):
+    for epoch in range(200):
+        result_metrics =  {'accuracy' : [], 'recall' : [], 'precision' : [], 'f1_macro' : []}
+        losses = []
         for ids, type_ids, attention_mask, label in tqdm(loader, desc = 'training'):
             optimizer.zero_grad()
             ids, type_ids, attention_mask, label = ids.to(model.device), type_ids.to(model.device), attention_mask.to(model.device), label.to(model.device)
             out = model(input_ids = ids, token_type_ids = type_ids, attention_mask = attention_mask)['logits']
             loss = lossfn(out.view(out.shape[0], -1), label.flatten())
-            loss.backward()
+            model.backward(loss)
             optimizer.step()
             scheduler.step()
-            metric.calc(out.argmax(-1).flatten(), label.flatten())
-        writer.add_scalar('metric/acc', metric.accuracy, epoch)
-        writer.add_scalar('metric/recall', metric.recall, epoch)
-        writer.add_scalar('metric/precision', metric.precision, epoch)
-        writer.add_scalar('metric/micro_f1', metric.micro_f1, epoch)
-        writer.add_scalar('metric/macro_f1', metric.macro_f1, epoch)
-        writer.add_scalar('loss', loss.item(), epoch)
+            out, label = out.argmax(-1).flatten().detach().cpu().numpy(), label.flatten().detach().cpu().numpy()
+            losses.append(loss.item())
+            result_metrics['accuracy'].append(metrics.accuracy_score(label, out))
+            result_metrics['recall'].append(metrics.recall_score(label, out, average = 'micro'))
+            result_metrics['precision'].append(metrics.precision_score(label, out, average = 'micro'))
+            result_metrics['f1_macro'].append(metrics.f1_score(label, out, average = 'macro'))
+        for key in result_metrics.keys():
+            result_metrics[key] = np.mean(result_metrics[key])
+        writer.add_scalars('metric', result_metrics, epoch)
+        writer.add_scalar('loss', np.mean(losses), epoch)
         model.save_checkpoint(args.save_path, args.mode)
 
 
@@ -134,5 +139,3 @@ elif args.mode == 'flan':
 elif args.mode == 'cls':
     model, dataset, lossfn, optimizer, scheduler = get_classification_settings()
     fine_tuning_classification_task(model, dataset, lossfn, optimizer, scheduler)
-
-
