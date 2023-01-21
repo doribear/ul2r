@@ -50,3 +50,9 @@ UL2R은 MLM과 유사하게 masking된 token을 복원하는 과제인데, UL2R�
  아래는 실제로 UL2R을 적용한 PaLM의 결과인데 UL2R을 적용하는 것이 상당히 좋은 결과를 보여주는 것은 확실해 보입니다.
 </p>
 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhPrW5Qz2au3fkXwUS8eUUqoP9Afd6Gl7pJPHjGVSPZpwy-7hMwMzKMNOigdEeWJgpQe8ODTTMzAE3h-_BZAbiYIxRqvEj3IDlKXHZpf3INnFx37jJFqIUIO3Ug0HStDtgEVhaugX7WeQowEAiTPVuez3dTwu-A-VpdvmQbmEtUSWrb8_hMy6-sgEnPVw/s16000/BigBenchPerform.png">
+
+## 4. ALBERT
+
+## 5. 결과
+
+## 6. Reference
