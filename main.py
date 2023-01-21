@@ -102,7 +102,7 @@ def fine_tuning_classification_task(model, dataset, lossfn, optimizer, scheduler
     model_parameters = model.parameters(), 
     training_data = dataset, 
     lr_scheduler = scheduler, 
-    config = {'train_batch_size' : 64, 'train_micro_batch_size_per_gpu' : 16})
+    config = {'train_batch_size' : 32, 'train_micro_batch_size_per_gpu' : 16})
 
     writer = SummaryWriter(f'{args.save_path}/sub_node_result')
     writer.add_text('parameter_size', f'{sum(p.numel() for p in model.parameters())}', 0)
@@ -116,7 +116,6 @@ def fine_tuning_classification_task(model, dataset, lossfn, optimizer, scheduler
             loss = lossfn(out.view(out.shape[0], -1), label.flatten())
             model.backward(loss)
             optimizer.step()
-            scheduler.step()
             out, label = out.argmax(-1).flatten().detach().cpu().numpy(), label.flatten().detach().cpu().numpy()
             losses.append(loss.item())
             result_metrics['accuracy'].append(metrics.accuracy_score(label, out))
@@ -127,7 +126,9 @@ def fine_tuning_classification_task(model, dataset, lossfn, optimizer, scheduler
             result_metrics[key] = np.mean(result_metrics[key])
         writer.add_scalars('metric', result_metrics, epoch)
         writer.add_scalar('loss', np.mean(losses), epoch)
+        writer.add_scalar('lr', optimizer.param_groups[-1]['lr'], epoch)
         model.save_checkpoint(args.save_path, args.mode)
+        scheduler.step()
 
 
 if args.mode == 'mlm':
