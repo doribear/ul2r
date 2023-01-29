@@ -3,10 +3,10 @@
 ## 1. 개요
 <p> 
  2022년 11월 29일 구글 AI BLOG에<strong><a href = "https://ai.googleblog.com/2022/11/better-language-models-without-massive.html">'Better Language Models Without Massive Compute'</a></strong>가 포스팅 되었습니다. 해당 게시글에서는 UL2R 및 Flan
-이라는 방식의 언어 모델의 성능 개선 방법을 제시 했습니다. UL2R은 기존 사전학습 방법에 단순한 MLM이 아닌 다양한 noising기법을 추가하는 방식이며,
+이라는 방식의 언어 모델의 성능 개선 방법을 제시 했습니다.[1] UL2R은 기존 사전학습 방법에 단순한 MLM이 아닌 다양한 noising기법을 추가하는 방식이며,
 FLan은 chain of thought, few shot등 다양한 prompt를 fine-tuning과정에 추가하는 방식입니다. 구글에서는 이를 PaLM을 통해 computing power를 절약하며, 
 LM을 고도화할 수 있는 방안을 제시한 것입니다. 그러나, PaLM자체도 Billion단위의 거대모델이므로 이에 대해 더 작은 모델로도 가능한지 확인하고자 상대적으로 작은 크기인
-4M크기의 LM을 이용해보고자 했습니다. LM의 구조는 Albert를 이용했으며, 이 저장소를 방문하시는 연구자 분들께 참고자료가 되기를 바랍니다.
+4M크기의 LM을 이용해보고자 했습니다. LM의 구조는 Albert를 이용했으며,[2] 이 저장소를 방문하시는 연구자 분들께 좋은 참고자료가 되기를 바랍니다.
 </p>
 <p>
  Flan의 경우에는 human power를 통해 추가적인 데이터를 생성해야하는 문제가 있어 해당 포스팅에서 제시된 내용 중 UL2R만을 적용했습니다. 또한 MLM과의 직접적 비교를 위해
@@ -52,7 +52,10 @@ UL2R은 MLM과 유사하게 masking된 token을 복원하는 과제인데, UL2R�
 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhPrW5Qz2au3fkXwUS8eUUqoP9Afd6Gl7pJPHjGVSPZpwy-7hMwMzKMNOigdEeWJgpQe8ODTTMzAE3h-_BZAbiYIxRqvEj3IDlKXHZpf3INnFx37jJFqIUIO3Ug0HStDtgEVhaugX7WeQowEAiTPVuez3dTwu-A-VpdvmQbmEtUSWrb8_hMy6-sgEnPVw/s16000/BigBenchPerform.png">
 
 ## 4. ALBERT
+ ALBERT는 BERT의 변형모델로 2019년 <a href="https://arxiv.org/abs/1909.11942">A Lite BERT for Self-supervised Learning of Language Representations</a>에 소개된 모델입니다. BERT와의 차이점은 모든 encoder의 parameter를 공유하는 Cross-layer parameter sharing과 입력 embedding의 크기를 줄이고 embedding과 encoder사이에 차원의 크기를 조절할 수 있도록 추가적인 linear layer를 추가하는 Factorized embedding layer parameterization이 적용된 점이 다릅니다. ALBERT는 BERT보다 상대적으로 가벼운 모델이지만 우수한 성능을 보이는 것으로 알려졌기에 ALBERT를 이용해 이번 실험을 진행했습니다.
 
 ## 5. 결과
 
 ## 6. Reference
+[1] Better Language Models Without Massive Compute https://ai.googleblog.com/2022/11/better-language-models-without-massive.html
+[2] Lan, Z., Chen, M., Goodman, S., Gimpel, K., Sharma, P., & Soricut, R. (2019). Albert: A lite bert for self-supervised learning of language representations. arXiv preprint arXiv:1909.11942.
