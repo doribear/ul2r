@@ -57,5 +57,5 @@ UL2R은 MLM과 유사하게 masking된 token을 복원하는 과제인데, UL2R�
 ## 5. 결과
 
 ## 6. Reference
-[1] Better Language Models Without Massive Compute https://ai.googleblog.com/2022/11/better-language-models-without-massive.html
+[1] Better Language Models Without Massive Compute https://ai.googleblog.com/2022/11/better-language-models-without-massive.html<br>
 [2] Lan, Z., Chen, M., Goodman, S., Gimpel, K., Sharma, P., & Soricut, R. (2019). Albert: A lite bert for self-supervised learning of language representations. arXiv preprint arXiv:1909.11942.
