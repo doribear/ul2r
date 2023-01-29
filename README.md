@@ -55,7 +55,7 @@ UL2R은 MLM과 유사하게 masking된 token을 복원하는 과제인데, UL2R�
  ALBERT는 BERT의 변형모델로 2019년 <a href="https://arxiv.org/abs/1909.11942">A Lite BERT for Self-supervised Learning of Language Representations</a>에 소개된 모델입니다. BERT와의 차이점은 모든 encoder의 parameter를 공유하는 Cross-layer parameter sharing과 입력 embedding의 크기를 줄이고 embedding과 encoder사이에 차원의 크기를 조절할 수 있도록 추가적인 linear layer를 추가하는 Factorized embedding layer parameterization이 적용된 점이 다릅니다. ALBERT는 BERT보다 상대적으로 가벼운 모델이지만 우수한 성능을 보이는 것으로 알려졌기에 ALBERT를 이용해 이번 실험을 진행했습니다.
 
 ## 5. 결과
- 아래 결과를 확인해보면 작은모델에서 flan이 mlm에 비해 성능에서 더 우수하다고는 보기 어려울 수도 있을 것 같습니다. 그 이유는 사실 mlm을 이용해 pretrain을 한 결과는 사실상 제대로 된 pretrain이 이루어 지지 않았기 때문입니다. 다만, flan과 mlm두 pretrain에 대해 동일한 데이터로 동일한 횟 수 학습을 했음에도 불구하고, flan에서는 적절한 pretrain이 이루어진 것이 중요한 점으로 보입니다.
+ 아래 결과를 확인해보면 작은모델에서 flan이 mlm에 비해 성능에서 더 우수하다고 결론 내릴 수는 없을것으로 보입니다. 그 이유는 사실 mlm을 이용해 pretrain을 한 결과는 사실상 제대로 된 pretrain이 이루어 지지 않은 것으로 보이기에 최종 fine tuning결과의 성능을 비교할 수 없기 때문입니다. 하지만, flan과 mlm두 pretrain에 대해 동일한 데이터로 동일한 횟 수 학습을 했음에도 불구하고, flan에서는 적절한 pretrain이 이루어진 것을 확인할 수 있기에 ul2r을 상대적으로 작은 모델에서도 시도해 볼만 하다고 결론 내릴 수 있습니다.
 <img src="mlm_flan비교.png">
 
 ## 6. Reference
